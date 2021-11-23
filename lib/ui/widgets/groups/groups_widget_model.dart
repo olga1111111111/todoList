@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_todo_list/domain/data_provaider/box_manager.dart';
 import 'package:flutter_application_todo_list/domain/entity/group.dart';
-import 'package:flutter_application_todo_list/domain/entity/task.dart';
+
 import 'package:flutter_application_todo_list/ui/navigation/main_navigation.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
@@ -16,11 +17,7 @@ class GroupWidgetModel extends ChangeNotifier {
   }
 
   void showTasks(BuildContext context, int groupIndex) async {
-    if (!Hive.isAdapterRegistered(1)) {
-      Hive.registerAdapter(GroupAdapter());
-    }
-
-    final box = await Hive.openBox<Group>('group_box');
+    final box = await BoxManager.instance.openGroupBox();
     final groupKey = box.keyAt(groupIndex) as int;
     Navigator.of(context)
         .pushNamed(MainNavigationRouteNames.tasks, arguments: groupKey);
@@ -31,11 +28,7 @@ class GroupWidgetModel extends ChangeNotifier {
   }
 
   void deleteGroup(int groupIndex) async {
-    if (!Hive.isAdapterRegistered(1)) {
-      Hive.registerAdapter(GroupAdapter());
-    }
-
-    final box = await Hive.openBox<Group>('group_box');
+    final box = await BoxManager.instance.openGroupBox();
     await box.getAt(groupIndex)?.tasks?.deleteAllFromHive();
     await box.deleteAt(groupIndex);
   }
@@ -46,15 +39,9 @@ class GroupWidgetModel extends ChangeNotifier {
   }
 
   void _setUp() async {
-    if (!Hive.isAdapterRegistered(1)) {
-      Hive.registerAdapter(GroupAdapter());
-    }
+    final box = await BoxManager.instance.openGroupBox();
 
-    final box = await Hive.openBox<Group>('group_box');
-    if (!Hive.isAdapterRegistered(2)) {
-      Hive.registerAdapter(TaskAdapter());
-    }
-    await Hive.openBox<Task>('task_box');
+    await BoxManager.instance.openTaskBox();
     //  в начале самом настраиваемся
     _readGroupsFromHive(box);
     // если произошли изменения:
