@@ -10,9 +10,11 @@ class BoxManager {
     return _openBox('group_box', 1, GroupAdapter());
   }
 
-  Future<Box<Task>> openTaskBox() async {
-    return _openBox('task_box', 2, TaskAdapter());
+  Future<Box<Task>> openTaskBox(int groupKey) async {
+    return _openBox(makeTaskBoxName(groupKey), 2, TaskAdapter());
   }
+
+  String makeTaskBoxName(int groupKey) => 'task_box_$groupKey';
 
   Future<void> closeBox<T>(Box<T> box) async {
     await box.compact();
