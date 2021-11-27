@@ -6,6 +6,7 @@ import 'package:hive/hive.dart';
 class BoxManager {
   static final BoxManager instance = BoxManager._();
   BoxManager._();
+
   Future<Box<Group>> openGroupBox() async {
     return _openBox('group_box', 1, GroupAdapter());
   }

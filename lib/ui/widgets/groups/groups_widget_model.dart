@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_application_todo_list/domain/data_provaider/box_manager.dart';
 import 'package:flutter_application_todo_list/domain/entity/group.dart';
@@ -10,6 +11,7 @@ import 'package:hive/hive.dart';
 
 class GroupWidgetModel extends ChangeNotifier {
   late final Future<Box<Group>> _box;
+  ValueListenable<Object>? _listenableBox;
   var _groups = <Group>[];
   // .toList для инкапсуляции вместе с геттером
   List<Group> get groups => _groups.toList();
@@ -55,7 +57,17 @@ class GroupWidgetModel extends ChangeNotifier {
     //  в начале самом настраиваемся
     _readGroupsFromHive();
     // если произошли изменения:
-    (await _box).listenable().addListener(_readGroupsFromHive);
+    _listenableBox = (await _box).listenable();
+    _listenableBox?.addListener(_readGroupsFromHive);
+  }
+
+  @override
+  Future<void> dispose() async {
+    //  отменить подписку перед тем, как закрыть бокс:
+    _listenableBox?.removeListener(_readGroupsFromHive);
+
+    await BoxManager.instance.closeBox((await _box));
+    super.dispose();
   }
 }
 

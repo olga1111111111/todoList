@@ -52,6 +52,13 @@ class _TasksWidgetState extends State<TasksWidget> {
     return TaskWidgetModelProvider(
         model: _model, child: const TaskWidgetBody());
   }
+
+  // вызывается автоматически в стейте, когда виджет исчезает из дерева:
+  @override
+  void dispose() async {
+    super.dispose();
+    await _model.dispose();
+  }
 }
 
 class TaskWidgetBody extends StatelessWidget {

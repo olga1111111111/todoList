@@ -1,4 +1,5 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_application_todo_list/domain/data_provaider/box_manager.dart';
 
 import 'package:flutter_application_todo_list/domain/entity/task.dart';
@@ -11,6 +12,7 @@ import 'package:hive/hive.dart';
 class TaskWidgetModel extends ChangeNotifier {
   final TaskWidgetConfiguration configuration;
   late final Future<Box<Task>> _box;
+  ValueListenable<Object>? _listenableBox;
   var _tasks = <Task>[];
   // .toList для инкапсуляции вместе с геттером
 
@@ -46,7 +48,15 @@ class TaskWidgetModel extends ChangeNotifier {
     //  в начале самом настраиваемся
     _readTasksFromHive();
     // если произошли изменения:
-    (await _box).listenable().addListener(_readTasksFromHive);
+    _listenableBox = (await _box).listenable();
+    _listenableBox?.addListener(_readTasksFromHive);
+  }
+
+  @override
+  Future<void> dispose() async {
+    _listenableBox?.removeListener(_readTasksFromHive);
+    await BoxManager.instance.closeBox((await _box));
+    super.dispose();
   }
 }
 
